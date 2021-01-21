@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blog App</title>
+    <link rel="stylesheet" th:href="@{/stylesheet.css}">
+</head>
+
+<body>
+
+<header>
+    <div class="topnav">
+        <a class="home" th:href="@{/}">Home</a>
+        <span sec:authorize="isAuthenticated()">
+            <a class="left" th:href="@{/new_post}">New Post</a>
+        </span>
+        <span sec:authorize="isAuthenticated()">
+            <a class="left" th:href="@{/user_posts}">My posts</a>
+        </span>
+        <span sec:authorize="isAuthenticated()">
+        <a class="right" th:href="@{/logout}">Logout</a>
+        </span>
+        <span sec:authorize="isAuthenticated()">
+            <a class="right">Welcome <span sec:authentication="name">name?</span></a>
+        </span>
+        <span sec:authorize="!isAuthenticated()">
+        <a class="right" th:href="@{/login}">Log In</a>
+        <a class="right" th:href="@{/register}">Sign Up</a>
+        </span>
+
+    </div>
+    <div class="header">
+        <h2>Blog app</h2>
+        <span class ="right">
+            <form  th:action="@{/}" method="get">
+                <input id="txtSearch" type="text" name="keyword">
+                <button type="submit">Submit</button>
+            </form>
+            <h2>Sort by: </h2>
+            <a th:href="@{'/sort' + '?sortField=title'}">Title</a>
+            <a th:href="@{'/sort' + '?sortField=post_content'}">Text</a>
+            <a th:href="@{'/sort' + '?sortField=tag'}">Tag</a>
+        </span>
+    </div>
+</header>
+
+
+<div class="container">
+
+    <h2>New comment</h2>
+
+    <form action="#"
+          th:action="@{'/comment'}"
+          th:object="${comment}"
+          method="post">
+        <div>
+            <input type="hidden" th:field="*{post_id}"/>
+            <input type="hidden" th:field="*{id}"/>
+        </div>
+
+
+        <label>
+            <span sec:authorize="!isAuthenticated()">
+                <input type="text" th:field="*{username}" id="username" placeholder="Username"/>
+            </span>
+        </label>
+        <label>
+            <div class="alert-red" th:if="${#fields.hasErrors('body')}" th:errors="{comment.body}">Body Error</div>
+            <textarea th:field="*{body}" placeholder="Comment text"></textarea>
+        </label>
+        <div>
+            <button class="green-btn" type="submit">Send</button>
+            </div>
+    </form>
+</div>
+
+<footer>
+    <div class="footer">
+        <p>Michał Milewski</p>
+    </div>
+</footer>
+
+</body>
+</html>
