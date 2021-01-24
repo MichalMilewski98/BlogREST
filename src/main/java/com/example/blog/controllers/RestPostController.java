@@ -44,10 +44,12 @@ public class RestPostController {
             return new ResponseEntity<Post>(HttpStatus.NOT_FOUND);
         }
     }
+
     @PostMapping("/post")
     public void add(@RequestBody PostDTO postDTO, Principal principal) {
         postService.addPost(postDTO, principal);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@RequestBody PostDTO postDTO, @PathVariable Long id, Principal principal) {
         try {
@@ -57,6 +59,7 @@ public class RestPostController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, Principal principal) throws NotFoundException {
 

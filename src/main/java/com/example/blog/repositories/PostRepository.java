@@ -12,4 +12,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value="select * from Posts p where p.post_content like %:keyword% or p.title like %:keyword%", nativeQuery = true)
     List<Post> findByKeyword(@Param("keyword") String keyword);
 
+    List<Post> findByOrderByTitleDesc();
+
+    List<Post> findByOrderByTitleAsc();
+
+    //List<Post> findAllByPost_contentByOrder();
+
+   // List<Post> findByPost_contentOrderByPost_content();
+
 }

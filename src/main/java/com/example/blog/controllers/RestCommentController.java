@@ -12,10 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -54,6 +57,18 @@ public class RestCommentController {
 
         commentService.deleteComment(postId, id, currentUser);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/comments/{username}")
+    public List<CommentDTO> getUserComments(@PathVariable String username) {
+
+        List<CommentDTO> commentsDto = new ArrayList<>();
+        List<Comment> comments = commentService.findCommentsByUser(username);
+        for (Comment comment: comments)
+        {
+            commentsDto.add(commentService.commentToCommentDto(comment));
+        }
+        return commentsDto;
     }
 
 
