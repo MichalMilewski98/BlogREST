@@ -29,7 +29,9 @@ public class  UserService implements UserDetailsService {
 
     private static final String DEFAULT_ROLE = "ROLE_USER";
     private final BCryptPasswordEncoder bcryptEncoder;
+    @Autowired
     private final RoleRepository roleRepository;
+    @Autowired
     private final UserRepository userRepository;
 
     @Override
@@ -51,7 +53,6 @@ public class  UserService implements UserDetailsService {
         user.setActive(true);
         // Set default Authority/Role to new blog user
         Optional<Role> optionalRole = this.roleRepository.findByRole(DEFAULT_ROLE);
-
         if (optionalRole.isPresent())
         {
             Role role = optionalRole.get();
@@ -67,7 +68,7 @@ public class  UserService implements UserDetailsService {
             List<Role> roles = Collections.singletonList(role);
             user.setUser_roles(roles);
             //throw new RoleNotFoundException("Default role not found for blog user with username " + user.getUsername());
-            return this.userRepository.saveAndFlush(user);
+            return userRepository.saveAndFlush(user);
         }
     }
 

@@ -9,22 +9,31 @@ import com.example.blog.entities.exception.PostNotFoundException;
 import com.example.blog.repositories.CommentRepository;
 import com.example.blog.repositories.PostRepository;
 import com.example.blog.repositories.UserRepository;
+import javassist.NotFoundException;
 import lombok.AllArgsConstructor;
-import lombok.var;
+import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.function.EntityResponse;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import javax.naming.CommunicationException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
+@Log
 @AllArgsConstructor
 @Service
 public class CommentService {
 
+    @Autowired
     private CommentRepository commentRepository;
     private UserRepository userRepository;
+    private PostRepository postRepository;
     private PostService postService;
+    @Autowired
     private UserService userService;
 
     public Comment save(Comment comment) {
@@ -66,6 +75,69 @@ public class CommentService {
     {
         Comment comment = new Comment(commentUserDTO.getId(), commentUserDTO.getBody(), getCommentAuthor(commentUserDTO.getUser()), postService.getPost(commentUserDTO.getPost_id()));
         return comment;
+    }
+
+
+    public Comment addComment(CommentDTO commentDTO, Long postId, Principal principal) throws NotFoundException {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException(postId.toString()));
+        User user = userRepository.findByUsername(principal.getName()).get();
+        log.severe(user.getUsername());
+        commentDTO.setUser(user.getUsername());
+        commentDTO.setPost_id(postId);
+        Comment comment = commentDtoToComment(commentDTO);
+        return commentRepository.save(comment);
+    }
+
+
+    public Comment getComment(Long postId, Long id) throws Exception {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException(postId.toString()));
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
+
+        if (comment.getPost().getId().equals(post.getId())) {
+            return comment;
+        }
+
+        throw new Exception(String.valueOf(HttpStatus.BAD_REQUEST));
+    }
+
+
+    public Comment updateComment(Long postId, Long id, CommentDTO commentDTO, Principal principal) throws Exception {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException(postId.toString()));
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
+
+        if (!comment.getPost().getId().equals(post.getId()) || userService.findAdmin(principal)) {
+            throw new Exception(String.valueOf(HttpStatus.BAD_REQUEST));
+        }
+        String username = principal.getName();
+        User user = userService.getUser(username).get();
+
+        if (comment.getUser().getId().equals(user.getId())) {
+            commentDTO.setUser(comment.getUser().getUsername());
+            comment = commentDtoToComment(commentDTO);
+            return commentRepository.save(comment);
+        }
+
+        throw new Exception(String.valueOf(HttpStatus.UNAUTHORIZED));
+    }
+
+    public ResponseEntity<Comment> deleteComment(Long postId, Long id, Principal principal) throws Exception{
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException(postId.toString()));
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
+
+        if (!comment.getPost().getId().equals(post.getId())) {
+            return new ResponseEntity<Comment>(HttpStatus.NOT_FOUND);
+        }
+
+        String username = principal.getName();
+        User user = userService.getUser(username).get();
+
+        if (comment.getUser().getId().equals(user.getId()) || userService.findAdmin(principal)) {
+            commentRepository.deleteById(comment.getId());
+            return new ResponseEntity<Comment>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<Comment>(HttpStatus.UNAUTHORIZED);
     }
 
 }

@@ -40,7 +40,6 @@ public class User implements UserDetails {
 
     @ValidPassword
     @NotEmpty(message = "Field password cant be empty")
-    @JsonIgnore
     private String password;
 
     @Column(name = "active", nullable = false)
