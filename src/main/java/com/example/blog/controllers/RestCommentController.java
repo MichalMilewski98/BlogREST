@@ -68,16 +68,6 @@ public class RestCommentController {
                 .map(commentService::commentToCommentDto)
                 .collect(Collectors.toList());
 
-        /*List<CommentDTO> commentsDto = new ArrayList<>();
-        List<Comment> comments = commentService.findCommentsByUser(username);
-        for (Comment comment: comments)
-        {
-            commentsDto.add(commentService.commentToCommentDto(comment));
-        }
-        return commentsDto;
-
-         */
     }
-
 
 }

@@ -113,7 +113,7 @@ public class RestPostController {
 
     }
 
-    @GetMapping("/sort/postcontent")
+   /* @GetMapping("/sort/postcontent")
     public List<PostDTO> sortByContent(@RequestParam String sort)
     {
         if(sort.equals("asc"))
@@ -134,5 +134,7 @@ public class RestPostController {
                     .map(postService::postToPostDTO)
                     .collect(Collectors.toList());
     }
+
+    */
 }
 
