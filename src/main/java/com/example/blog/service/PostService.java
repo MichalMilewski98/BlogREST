@@ -159,25 +159,32 @@ public class PostService {
     }
 
     public ResponseEntity<Post> updatePost(Long id, PostDTO postDTO, Principal principal) throws NotFoundException {
+
+
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
 
-        if (userService.isAuthor(post.getPost_authors(), principal.getName()))
+        if (userService.isAuthor(post.getPost_authors(), principal.getName()) || userService.findAdmin(principal))
         {
            post = postDTOtoPost(postDTO);
            postRepository.save(post);
            return new ResponseEntity<Post>(HttpStatus.OK);
         }
         return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
+
     }
 
 
-    public ResponseEntity<Post> deletePost(Long id, Principal principal) throws NotFoundException {
-        Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
-        if (userService.isAuthor(post.getPost_authors(), principal.getName()))
-        {
-            postRepository.deleteById(id);
-            return new ResponseEntity<Post>(HttpStatus.OK);
-        }
-        return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
-    }
+    public boolean deletePost(Long id, Principal principal) throws NotFoundException {
+
+        return Optional.of(postRepository.existsById(id))
+                .filter(e -> e)
+                .filter(author -> userService.isAuthor(postRepository.getOne(id).getPost_authors(), principal.getName())
+                        ||  userService.findAdmin(principal))
+                .map(m -> {
+                    postRepository.deleteById(id);
+                    return true;
+                })
+                .orElse(false);
+         }
+
 }

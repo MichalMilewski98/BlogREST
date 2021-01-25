@@ -4,6 +4,7 @@ package com.example.blog.controllers;
 import com.example.blog.DTO.PostDTO;
 import com.example.blog.entities.Post;
 import com.example.blog.entities.User;
+import com.example.blog.repositories.PostRepository;
 import com.example.blog.service.PostService;
 import com.example.blog.service.UserService;
 import javassist.NotFoundException;
@@ -18,6 +19,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 
 @NoArgsConstructor
@@ -29,10 +31,16 @@ public class RestPostController {
     private UserService userService;
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping("/posts")
-    public List<Post> list() {
-        return postService.getAllPosts();
+    public List<PostDTO> list()
+    {
+        return postService.getAllPosts()
+                .stream()
+                .map(postService::postToPostDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -61,23 +69,70 @@ public class RestPostController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id, Principal principal) throws NotFoundException {
+    public ResponseEntity<Post> delete(@PathVariable Long id, Principal principal) throws NotFoundException {
 
-        postService.deletePost(id, principal);
+        if(postService.deletePost(id, principal))
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
     }
 
     @GetMapping(value = "/posts/{username}")
     public List<PostDTO> getAuthorPostsInJson(@PathVariable String username) {
 
-        List<PostDTO> authorPosts = new ArrayList<>();
-        List<Post> allPosts =  postService.getAllPosts();
-        for (Post post : allPosts)
-        {
-            PostDTO postDTO = postService.postToPostDTO(post);
-            if(postDTO.getPost_authors().contains(username))
-                authorPosts.add(postDTO);
-        }
-        return authorPosts;
+        return postService.getAllPosts()
+                .stream()
+                .map(postService::postToPostDTO)
+                .filter(post -> post.getPost_authors()
+                        .contains(username))
+                .collect(Collectors.toList());
+
+    }
+
+    @GetMapping("/sort/title")
+    public List<PostDTO> sortByTitle(@RequestParam String sort)
+    {
+        if(sort.equals("asc"))
+             return postRepository.findByOrderByTitleAsc()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
+
+        else if(sort.equals("dsc"))
+            return postRepository.findByOrderByTitleDesc()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
+
+        else
+            return postService.getAllPosts()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
+
+    }
+
+    @GetMapping("/sort/postcontent")
+    public List<PostDTO> sortByContent(@RequestParam String sort)
+    {
+        if(sort.equals("asc"))
+            return postRepository.findByOrderByPost_contentAsc()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
+
+        else if(sort.equals("dsc"))
+            return postRepository.findByOrderByPost_contentDesc()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
+
+        else
+            return postService.getAllPosts()
+                    .stream()
+                    .map(postService::postToPostDTO)
+                    .collect(Collectors.toList());
     }
 }
 

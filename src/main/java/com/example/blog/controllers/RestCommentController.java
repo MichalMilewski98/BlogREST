@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -62,13 +62,21 @@ public class RestCommentController {
     @GetMapping(value = "/comments/{username}")
     public List<CommentDTO> getUserComments(@PathVariable String username) {
 
-        List<CommentDTO> commentsDto = new ArrayList<>();
+        return commentService
+                .findCommentsByUser(username)
+                .stream()
+                .map(commentService::commentToCommentDto)
+                .collect(Collectors.toList());
+
+        /*List<CommentDTO> commentsDto = new ArrayList<>();
         List<Comment> comments = commentService.findCommentsByUser(username);
         for (Comment comment: comments)
         {
             commentsDto.add(commentService.commentToCommentDto(comment));
         }
         return commentsDto;
+
+         */
     }
 
 

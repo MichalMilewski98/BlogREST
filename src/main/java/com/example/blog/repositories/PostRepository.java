@@ -16,8 +16,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByOrderByTitleAsc();
 
-    //List<Post> findAllByPost_contentByOrder();
+    List<Post> findByOrderByPost_contentAsc();
 
-   // List<Post> findByPost_contentOrderByPost_content();
+    List<Post> findByOrderByPost_contentDesc();
 
 }
