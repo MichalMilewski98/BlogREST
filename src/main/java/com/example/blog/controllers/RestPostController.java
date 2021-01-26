@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -54,13 +55,18 @@ public class RestPostController {
     }
 
     @PostMapping("/post")
-    public void add(@RequestBody PostDTO postDTO, Principal principal) {
+    public ResponseEntity<PostDTO> add(@RequestBody PostDTO postDTO, Principal principal) {
+        if(principal==null)
+            return new ResponseEntity<PostDTO>(HttpStatus.UNAUTHORIZED);
         postService.addPost(postDTO, principal);
+            return new ResponseEntity<PostDTO>(postDTO, HttpStatus.OK);
+
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@RequestBody PostDTO postDTO, @PathVariable Long id, Principal principal) {
-
+        if(principal==null)
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if(postService.updatePost(id, postDTO, principal))
             return new ResponseEntity<>(HttpStatus.OK);
         else
@@ -70,6 +76,8 @@ public class RestPostController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Post> delete(@PathVariable Long id, Principal principal) throws NotFoundException {
 
+        if(principal==null)
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if(postService.deletePost(id, principal))
             return new ResponseEntity<>(HttpStatus.OK);
         else
