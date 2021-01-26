@@ -51,6 +51,25 @@ INSERT INTO POST_AUTHORS (post_id, user_id)
 VALUES (4, 3);
 
 
+INSERT INTO TAGS (id, name)
+VALUES (1, 'tag1');
+INSERT INTO TAGS (id, name)
+VALUES (2, 'tag2');
+INSERT INTO TAGS (id, name)
+VALUES (3, 'tag3');
+INSERT INTO TAGS (id, name)
+VALUES (4, 'tag4');
+
+INSERT INTO POST_TAGS (post_id, tag_id)
+VALUES (1, 1);
+INSERT INTO POST_TAGS (post_id, tag_id)
+VALUES (1, 2);
+INSERT INTO POST_TAGS (post_id, tag_id)
+VALUES (2, 2);
+INSERT INTO POST_TAGS (post_id, tag_id)
+VALUES (3, 3);
+
+
 -- Comments
 INSERT INTO COMMENTS (id, post_id, user_id, body)
 VALUES (1, 1, 1,

@@ -44,12 +44,12 @@ public class RestPostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> get(@PathVariable Long id) {
+    public ResponseEntity<PostDTO> get(@PathVariable Long id) {
         try {
             Post post = postService.getPost(id);
-            return new ResponseEntity<Post>(post, HttpStatus.OK);
+            return new ResponseEntity<PostDTO>(postService.postToPostDTO(post), HttpStatus.OK);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<Post>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<PostDTO>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -60,12 +60,11 @@ public class RestPostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@RequestBody PostDTO postDTO, @PathVariable Long id, Principal principal) {
-        try {
-           postService.updatePost(id, postDTO, principal);
+
+        if(postService.updatePost(id, postDTO, principal))
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NoSuchElementException | NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        else
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @DeleteMapping("/{id}")

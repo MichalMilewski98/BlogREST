@@ -173,17 +173,18 @@ public class PostService {
         return newPost;
     }
 
-    public ResponseEntity<Post> updatePost(Long id, PostDTO postDTO, Principal principal) throws NotFoundException {
+    public boolean updatePost(Long id, PostDTO postDTO, Principal principal) {
 
-        Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
+        Optional<Post> post = postRepository.findById(id);
 
-        if (userService.isAuthor(post.getPost_authors(), principal.getName()) || userService.findAdmin(principal))
-        {
-           post = postDTOtoPost(postDTO);
-           postRepository.save(post);
-           return new ResponseEntity<Post>(HttpStatus.OK);
+        if(post.isPresent()) {
+            if (userService.isAuthor(post.get().getPost_authors(), principal.getName()) || userService.findAdmin(principal)) {
+                post = Optional.ofNullable(postDTOtoPost(postDTO));
+                postRepository.save(post.get());
+                return true;
+            }
         }
-        return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
+        return false;
     }
 
     public boolean deletePost(Long id, Principal principal) throws NotFoundException {

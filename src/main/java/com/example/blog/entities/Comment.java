@@ -12,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "Comment cant be empty")

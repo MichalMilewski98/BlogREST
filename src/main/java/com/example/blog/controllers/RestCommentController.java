@@ -37,23 +37,29 @@ public class RestCommentController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/{postId}/{id}")
-    public ResponseEntity<Comment> getComment(@PathVariable Long postId, @PathVariable Long id) throws Exception {
+    @GetMapping("/{id}")
+    public ResponseEntity<CommentDTO> getComment(@PathVariable Long id) throws Exception {
 
-        commentService.getComment(postId, id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        commentService.getComment(id);
+        return new ResponseEntity<CommentDTO>(commentService.commentToCommentDto(commentService.getComment(id)),HttpStatus.OK);
     }
 
-    @PutMapping("/{postId}/{id}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long postId, @PathVariable Long id, @Valid @RequestBody CommentDTO commentDTO,
+    @PutMapping("/{id}")
+    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @Valid @RequestBody CommentDTO commentDTO,
                                                  Principal currentUser) throws Exception {
-
-        Comment updatedComment = commentService.updateComment(postId, id, commentDTO, currentUser);
-        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+        if(currentUser==null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(commentService.updateComment(id, commentDTO, currentUser))
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @DeleteMapping("/{postId}/{id}")
     public ResponseEntity<Comment> deleteComment(@PathVariable Long postId, @PathVariable Long id, Principal currentUser) throws Exception {
+
+        if(currentUser==null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         commentService.deleteComment(postId, id, currentUser);
         return new ResponseEntity<>(HttpStatus.OK);
