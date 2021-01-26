@@ -37,7 +37,7 @@ public class RestRegisterController {
                             "Username already in use");
         }
         if (bindingResult.hasErrors()) {
-            System.err.println("New user did not validate");
+            return new ResponseEntity<User>(HttpStatus.NOT_ACCEPTABLE);
         }
 
         try {

@@ -113,28 +113,18 @@ public class RestPostController {
 
     }
 
-   /* @GetMapping("/sort/postcontent")
-    public List<PostDTO> sortByContent(@RequestParam String sort)
-    {
-        if(sort.equals("asc"))
-            return postRepository.findByOrderByPost_contentAsc()
-                    .stream()
-                    .map(postService::postToPostDTO)
-                    .collect(Collectors.toList());
+    @GetMapping(value = "/posts/filter/{keyword}")
+    public List<PostDTO> getPostsByKeyword(@PathVariable String keyword) {
 
-        else if(sort.equals("dsc"))
-            return postRepository.findByOrderByPost_contentDesc()
-                    .stream()
-                    .map(postService::postToPostDTO)
-                    .collect(Collectors.toList());
-
-        else
-            return postService.getAllPosts()
-                    .stream()
-                    .map(postService::postToPostDTO)
-                    .collect(Collectors.toList());
+        return postService.filterPostsByKeyword(keyword);
     }
 
-    */
+
+    @PatchMapping("/tag/{id}")
+    public ResponseEntity<Post> addTag(@RequestBody String tag, @PathVariable Long id, Principal principal) throws NotFoundException {
+
+        return postService.addTagToPost(id, tag, principal);
+    }
+
 }
 

@@ -27,7 +27,7 @@ public class BlogApplication {
 		SpringApplication.run(BlogApplication.class, args);
 	}
 
-	@Bean
+	/*@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
 
@@ -38,5 +38,8 @@ public class BlogApplication {
 
 		};
 	}
+
+	 */
+
 
 }

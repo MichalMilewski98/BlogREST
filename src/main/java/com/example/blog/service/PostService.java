@@ -23,6 +23,7 @@ import org.springframework.web.servlet.function.EntityResponse;
 import java.nio.file.attribute.UserPrincipal;
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @NoArgsConstructor
@@ -78,16 +79,30 @@ public class PostService {
 
     public List<Post> findByKeyword(String keyword){return postRepository.findByKeyword(keyword);}
 
-    public List<Tag> tagList(String tag_name)
+    public List<Tag> tagList(String tag_name, Long id)
     {
+        Optional<Post> currentPost = postRepository.findById(id);
+        if(currentPost.isPresent()) {
+            List<Tag> usedTags = currentPost.get().getPost_tags();
+
+            for (Tag tag : usedTags) {
+                tag_name += "," + tag.getName();
+            }
+        }
         List<String> listOfStrings = Arrays.asList(tag_name.split("[ ,]+"));
+
+        List<String> noDuplicatesTags = listOfStrings
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
+
         List<Tag> tags = new ArrayList<>();
 
-        for (String _tag : listOfStrings) {
+        for (String _tag : noDuplicatesTags) {
             if (!tagRepository.findByName(_tag).isPresent()) {
                 Tag tag = new Tag(_tag);
-                tagRepository.save(tag);
                 tags.add(tag);
+                tagRepository.save(tag);
             } else {
                 tags.add(tagRepository.findByName(_tag).get());
             }
@@ -138,7 +153,7 @@ public class PostService {
 
     public Post postDTOtoPost(PostDTO postDTO)
     {
-        Post post = new Post(postDTO.getId(), authorList(postDTO.getPost_authors()), postDTO.getTitle(), postDTO.getPost_content(), tagList(postDTO.getTag()), postDTO.isIsprivate());
+        Post post = new Post(postDTO.getId(), authorList(postDTO.getPost_authors()), postDTO.getTitle(), postDTO.getPost_content(), tagList(postDTO.getTag(), postDTO.getId()), postDTO.isIsprivate());
         return post;
     }
 
@@ -160,7 +175,6 @@ public class PostService {
 
     public ResponseEntity<Post> updatePost(Long id, PostDTO postDTO, Principal principal) throws NotFoundException {
 
-
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
 
         if (userService.isAuthor(post.getPost_authors(), principal.getName()) || userService.findAdmin(principal))
@@ -170,21 +184,49 @@ public class PostService {
            return new ResponseEntity<Post>(HttpStatus.OK);
         }
         return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
-
     }
-
 
     public boolean deletePost(Long id, Principal principal) throws NotFoundException {
 
         return Optional.of(postRepository.existsById(id))
                 .filter(e -> e)
-                .filter(author -> userService.isAuthor(postRepository.getOne(id).getPost_authors(), principal.getName())
-                        ||  userService.findAdmin(principal))
+                .filter(author -> userService.isAuthor(postRepository.getOne(id).getPost_authors(),
+                principal.getName()) ||  userService.findAdmin(principal))
                 .map(m -> {
                     postRepository.deleteById(id);
                     return true;
                 })
                 .orElse(false);
          }
+
+    public List<PostDTO> filterPostsByKeyword(String keyword) {
+
+        return getAllPosts()
+                .stream()
+                .map(this::postToPostDTO)
+                .filter(post -> post.getTag().contains(keyword)
+                || post.getTitle().contains(keyword)
+                || post.getPost_content().contains(keyword))
+                .collect(Collectors.toList());
+         }
+
+    public ResponseEntity<Post> addTagToPost(Long id, String tag, Principal principal) throws NotFoundException {
+
+        Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
+
+         if(principal != null)
+         {
+            if (userService.isAuthor(post.getPost_authors(), principal.getName()) || userService.findAdmin(principal)) {
+                PostDTO postDTO = postToPostDTO(post);
+                postDTO.setTag(tag);
+                post = postDTOtoPost(postDTO);
+                postRepository.save(post);
+                return new ResponseEntity<Post>(HttpStatus.OK);
+            } else
+                return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<Post>(HttpStatus.UNAUTHORIZED);
+
+    }
 
 }
