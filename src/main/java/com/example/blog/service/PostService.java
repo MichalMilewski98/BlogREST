@@ -1,6 +1,5 @@
 package com.example.blog.service;
 
-import com.example.blog.DTO.CommentUserDTO;
 import com.example.blog.DTO.PostDTO;
 import com.example.blog.entities.Post;
 import com.example.blog.entities.Tag;
@@ -10,19 +9,18 @@ import com.example.blog.repositories.PostRepository;
 import com.example.blog.repositories.TagRepository;
 import com.example.blog.repositories.UserRepository;
 import javassist.NotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.function.EntityResponse;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.security.Principal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 

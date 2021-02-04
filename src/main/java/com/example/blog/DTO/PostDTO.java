@@ -1,24 +1,19 @@
 package com.example.blog.DTO;
 
-import com.opencsv.bean.CsvBindByName;
 import lombok.Data;
 
 
 @Data
 public class PostDTO {
 
-    @CsvBindByName
     private Long id;
 
     private String title;
 
-    @CsvBindByName
     private String tag;
 
-    @CsvBindByName
     private String post_content;
 
-    @CsvBindByName
     private String post_authors;
 
 

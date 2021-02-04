@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.function.EntityResponse;
 
-import javax.naming.CommunicationException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -109,15 +107,18 @@ public class CommentService {
 
         String username = principal.getName();
         User user = userService.getUser(username).get();
+        if(commentRepository.findById(id).isPresent()) {
 
-        if (comment.getUser().getId().equals(user.getId())) {
-            commentDTO.setUser(comment.getUser().getUsername());
-            comment = commentDtoToComment(commentDTO);
-            commentRepository.save(comment);
-            return true;
+            if (comment.getUser().getId().equals(user.getId())) {
+                commentDTO.setUser(comment.getUser().getUsername());
+                comment = commentDtoToComment(commentDTO);
+                commentRepository.save(comment);
+                return true;
+            }
+
+            return false;
         }
-
-       return false;
+        return false;
     }
 
     public ResponseEntity<Comment> deleteComment(Long postId, Long id, Principal principal) throws Exception{
