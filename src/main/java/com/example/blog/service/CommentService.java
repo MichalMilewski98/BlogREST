@@ -104,9 +104,9 @@ public class CommentService {
     public boolean updateComment(Long id, CommentDTO commentDTO, Principal principal) throws Exception {
 
         Comment comment = commentRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
-
         String username = principal.getName();
         User user = userService.getUser(username).get();
+
         if(commentRepository.findById(id).isPresent()) {
 
             if (comment.getUser().getId().equals(user.getId())) {

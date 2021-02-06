@@ -12,8 +12,6 @@ import javassist.NotFoundException;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -163,7 +161,6 @@ public class PostService {
 
     public Post addPost(PostDTO postDTO, Principal principal) {
 
-        //User user = userRepository.findByUsername(currentUser.getName()).get();
         postDTO.setPost_authors(principal.getName());
         Post post = postDTOtoPost(postDTO);
         Post newPost = postRepository.save(post);
@@ -209,7 +206,7 @@ public class PostService {
                 .collect(Collectors.toList());
          }
 
-    public ResponseEntity<Post> addTagToPost(Long id, String tag, Principal principal) throws NotFoundException {
+    public boolean addTagToPost(Long id, String tag, Principal principal) throws NotFoundException {
 
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
 
@@ -220,11 +217,11 @@ public class PostService {
                 postDTO.setTag(tag);
                 post = postDTOtoPost(postDTO);
                 postRepository.save(post);
-                return new ResponseEntity<Post>(HttpStatus.OK);
+                return true;
             } else
-                return new ResponseEntity<Post>(HttpStatus.FORBIDDEN);
+                return false;
         }
-        return new ResponseEntity<Post>(HttpStatus.UNAUTHORIZED);
+        return false;
 
     }
 
